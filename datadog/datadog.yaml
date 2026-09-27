@@ -1,0 +1,74 @@
+kind: "DatadogAgent"
+apiVersion: "datadoghq.com/v2alpha1"
+metadata:
+  name: "datadog"
+  namespace: "datadog"
+spec:
+  global:
+    clusterName: "pathnex-sep-2026"
+    # Include pod_name on integration metrics for pod-level dashboard filters.
+    checksTagCardinality: "orchestrator"
+    site: "datadoghq.com"
+    credentials:
+      apiSecret:
+        secretName: "datadog-secret"
+        keyName: "api-key"
+    tags:
+      - "env:prod"
+  features:
+    # Supplies Deployment, StatefulSet, DaemonSet, HPA, Pod, PV and PVC metrics.
+    kubeStateMetricsCore:
+      enabled: true
+    clusterChecks:
+      enabled: true
+    orchestratorExplorer:
+      enabled: true
+    apm:
+      instrumentation:
+        enabled: true
+        targets:
+          - name: "default-target"
+            ddTraceVersions:
+              java: "1"
+              python: "4"
+              js: "6"
+              php: "1"
+              dotnet: "3"
+              ruby: "2"
+            ddTraceConfigs:
+              - name: "DD_RUM_ENABLED"
+                value: "true"
+              - name: "DD_RUM_APPLICATION_ID"
+                value: "c50a10fe-74a5-48f8-a308-f0574c22bebd"
+              - name: "DD_RUM_CLIENT_TOKEN"
+                value: "pub9939a68f78758833efa5b910cee24286"
+              - name: "DD_RUM_REMOTE_CONFIGURATION_ID"
+                value: "1c00d02b-6b1d-4e43-8dd2-e70af2569a04"
+              - name: "DD_RUM_SITE"
+                value: "datadoghq.com"
+    logCollection:
+      enabled: true
+      containerCollectAll: true
+    autoscaling:
+      workload:
+        enabled: true
+    eventCollection:
+      collectKubernetesEvents: true
+      unbundleEvents: true
+      collectedEventTypes:
+        - kind: Pod
+          reasons:
+            - Failed
+            - BackOff
+            - Unhealthy
+            - FailedScheduling
+            - FailedMount
+            - FailedAttachVolume
+        - kind: Node
+          reasons:
+            - NodeNotReady
+            - TerminatingEvictedPod
+        - kind: PersistentVolumeClaim
+          reasons:
+            - ProvisioningFailed
+            - WaitForFirstConsumer
